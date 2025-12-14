@@ -1,7 +1,7 @@
 import React from 'react';
 import { AnalysisResult, KeywordData, ContentTopic } from '../types';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
-import { Target, TrendingUp, Users, FileText, Activity, Download } from 'lucide-react';
+import { Target, TrendingUp, Users, FileText, Activity, Download, Megaphone, Lightbulb, AlertCircle } from 'lucide-react';
 
 interface Props {
   data: AnalysisResult;
@@ -68,27 +68,78 @@ const AnalysisDashboard: React.FC<Props> = ({ data }) => {
           <Activity className="text-brand-600" />
           Strategic Analysis
         </h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-          <div className="bg-brand-50 p-4 rounded-lg">
-            <div className="flex items-center gap-2 mb-2 text-brand-900 font-semibold">
-              <Target size={18} /> Niche
+        
+        {/* Top 3 Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+          <div className="bg-brand-50 p-5 rounded-xl border border-brand-100">
+            <div className="flex items-center gap-2 mb-3 text-brand-900 font-bold">
+              <Target size={20} /> Niche
             </div>
-            <p className="text-slate-700 text-sm">{data.domainAnalysis.niche}</p>
+            <p className="text-slate-700 text-sm leading-relaxed">{data.domainAnalysis.niche}</p>
           </div>
-          <div className="bg-purple-50 p-4 rounded-lg">
-            <div className="flex items-center gap-2 mb-2 text-purple-900 font-semibold">
-              <Users size={18} /> Audience
+          <div className="bg-purple-50 p-5 rounded-xl border border-purple-100">
+            <div className="flex items-center gap-2 mb-3 text-purple-900 font-bold">
+              <Users size={20} /> Audience
             </div>
-            <p className="text-slate-700 text-sm">{data.domainAnalysis.targetAudience}</p>
+            <p className="text-slate-700 text-sm leading-relaxed">{data.domainAnalysis.targetAudience}</p>
           </div>
-          <div className="bg-emerald-50 p-4 rounded-lg">
-            <div className="flex items-center gap-2 mb-2 text-emerald-900 font-semibold">
-              <TrendingUp size={18} /> Competitor Insight
+          <div className="bg-emerald-50 p-5 rounded-xl border border-emerald-100">
+             <div className="flex items-center gap-2 mb-3 text-emerald-900 font-bold">
+              <TrendingUp size={20} /> Competitor Overview
             </div>
-            <p className="text-slate-700 text-sm">{data.domainAnalysis.competitorInsights}</p>
+            <p className="text-slate-700 text-sm leading-relaxed">
+              {data.domainAnalysis.competitorInsights.overview}
+            </p>
           </div>
         </div>
-        <p className="text-slate-600 italic border-l-4 border-brand-500 pl-4 py-2 bg-slate-50 rounded-r">
+
+        {/* Detailed Competitor Insights Breakdown */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+           {/* USPs */}
+           <div className="bg-white p-4 rounded-lg border border-slate-100 shadow-sm">
+             <div className="flex items-center gap-2 mb-3 text-amber-600 font-semibold text-sm uppercase tracking-wide">
+               <Lightbulb size={16} /> Competitor USPs
+             </div>
+             <ul className="space-y-2">
+               {data.domainAnalysis.competitorInsights.uniqueSellingPoints.map((usp, i) => (
+                 <li key={i} className="text-sm text-slate-600 flex items-start gap-2">
+                   <span className="text-amber-400 mt-1">•</span> {usp}
+                 </li>
+               ))}
+             </ul>
+           </div>
+
+           {/* Content Gaps */}
+           <div className="bg-white p-4 rounded-lg border border-slate-100 shadow-sm">
+             <div className="flex items-center gap-2 mb-3 text-red-500 font-semibold text-sm uppercase tracking-wide">
+               <AlertCircle size={16} /> Content Gaps
+             </div>
+             <ul className="space-y-2">
+               {data.domainAnalysis.competitorInsights.contentGaps.map((gap, i) => (
+                 <li key={i} className="text-sm text-slate-600 flex items-start gap-2">
+                   <span className="text-red-300 mt-1">•</span> {gap}
+                 </li>
+               ))}
+             </ul>
+           </div>
+
+           {/* CTAs */}
+           <div className="bg-white p-4 rounded-lg border border-slate-100 shadow-sm">
+             <div className="flex items-center gap-2 mb-3 text-blue-500 font-semibold text-sm uppercase tracking-wide">
+               <Megaphone size={16} /> Common CTAs
+             </div>
+             <ul className="space-y-2">
+               {data.domainAnalysis.competitorInsights.commonCTAs.map((cta, i) => (
+                 <li key={i} className="text-sm text-slate-600 flex items-start gap-2">
+                   <span className="text-blue-300 mt-1">•</span> {cta}
+                 </li>
+               ))}
+             </ul>
+           </div>
+        </div>
+
+        <p className="text-slate-600 italic border-l-4 border-brand-500 pl-4 py-3 bg-slate-50 rounded-r text-sm">
+          <span className="font-semibold text-brand-900 not-italic block mb-1">Strategic Summary</span>
           "{data.strategicSummary}"
         </p>
       </div>

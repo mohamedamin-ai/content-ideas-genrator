@@ -15,11 +15,18 @@ export interface ContentTopic {
   contentType: 'Blog Post' | 'Landing Page' | 'Guide' | 'Case Study';
 }
 
+export interface CompetitorData {
+  overview: string;
+  commonCTAs: string[];
+  uniqueSellingPoints: string[];
+  contentGaps: string[];
+}
+
 export interface AnalysisResult {
   domainAnalysis: {
     niche: string;
     targetAudience: string;
-    competitorInsights: string;
+    competitorInsights: CompetitorData;
   };
   keywords: KeywordData[];
   topics: ContentTopic[];

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Sparkles, Loader2, BarChart2, Globe, Cpu, Link as LinkIcon, Calculator, Database, Settings, ChevronDown, ChevronUp } from 'lucide-react';
+import { Sparkles, Loader2, BarChart2, Globe, Cpu, Link as LinkIcon, Calculator, Database, Settings, ChevronDown, ChevronUp, Layers, Zap, FileText } from 'lucide-react';
 import { generateContentPlan } from './services/analysis';
 import { AnalysisResult, AnalysisStatus } from './types';
 import AnalysisDashboard from './components/AnalysisDashboard';
@@ -13,8 +13,10 @@ https://www.alfuttaim.com/divisions/education-foundation/`;
 
 function App() {
   const [urls, setUrls] = useState(DEFAULT_URLS);
+  const [pageContent, setPageContent] = useState<string>("");
   const [numTopics, setNumTopics] = useState<number>(5);
   const [customIgnore, setCustomIgnore] = useState<string>("");
+  const [diversityLevel, setDiversityLevel] = useState<'low' | 'medium' | 'high'>('medium');
   const [showSettings, setShowSettings] = useState(false);
   const [status, setStatus] = useState<AnalysisStatus>(AnalysisStatus.IDLE);
   const [result, setResult] = useState<AnalysisResult | null>(null);
@@ -35,7 +37,7 @@ function App() {
       .filter(s => s.length > 0);
 
     try {
-      const data = await generateContentPlan(urls, numTopics, ignoreList);
+      const data = await generateContentPlan(urls, pageContent, numTopics, ignoreList, diversityLevel);
       setResult(data);
       setStatus(AnalysisStatus.SUCCESS);
     } catch (err: any) {
@@ -59,8 +61,8 @@ function App() {
             </h1>
           </div>
           <div className="flex items-center gap-4 text-sm text-slate-500">
-             <span className="flex items-center gap-1"><Calculator size={14}/> TF-IDF Engine</span>
-             <span className="flex items-center gap-1"><Database size={14}/> Live Scraping</span>
+             <span className="flex items-center gap-1"><Sparkles size={14} className="text-amber-500"/> Gemini 2.5 Flash</span>
+             <span className="flex items-center gap-1"><Globe size={14} className="text-blue-500"/> Live Grounding</span>
           </div>
         </div>
       </header>
@@ -70,10 +72,10 @@ function App() {
         {/* Input Section */}
         <div className="max-w-4xl mx-auto mb-8 text-center">
           <h2 className="text-4xl font-extrabold text-slate-900 mb-4 tracking-tight">
-            Data-Driven Content Intelligence
+            AI-Driven Content Intelligence
           </h2>
           <p className="text-lg text-slate-600 mb-8">
-            Perform deep statistical analysis on multiple URLs. We use <strong>Deterministic Python-style NLP</strong> (TF-IDF, Tokenization) to mathematically identify high-impact topics without AI hallucination.
+            Perform deep semantic analysis on multiple URLs. We use <strong>Gemini 2.5 with Google Search Grounding</strong> to identify high-impact topics and competitor gaps in real-time.
           </p>
 
           <form onSubmit={handleAnalyze} className="max-w-4xl mx-auto flex flex-col gap-4">
@@ -100,7 +102,7 @@ function App() {
                       <textarea
                           id="url-input"
                           required
-                          rows={6}
+                          rows={3}
                           className="block w-full pl-11 pr-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent shadow-sm transition-all text-sm font-mono leading-relaxed resize-y"
                           placeholder="https://example.com"
                           value={urls}
@@ -110,8 +112,31 @@ function App() {
               </div>
             </div>
 
+            {/* Page Content Input */}
+            <div className="relative w-full text-left">
+              <label htmlFor="content-input" className="block text-sm font-medium text-slate-700 mb-1 ml-1">
+                 Additional Context / Page Content (Optional)
+              </label>
+              <div className="relative">
+                <div className="absolute top-4 left-4 pointer-events-none">
+                  <FileText className="h-5 w-5 text-slate-400" />
+                </div>
+                <textarea
+                  id="content-input"
+                  rows={4}
+                  className="block w-full pl-11 pr-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent shadow-sm transition-all text-sm leading-relaxed resize-y"
+                  placeholder="Paste raw text, brand guidelines, or specific article content here to guide the analysis..."
+                  value={pageContent}
+                  onChange={(e) => setPageContent(e.target.value)}
+                />
+              </div>
+              <p className="text-xs text-slate-500 mt-1 ml-1">
+                Providing raw content helps the AI understand specific tone, details, and USPs not always visible to crawlers.
+              </p>
+            </div>
+
             {/* Advanced Settings Toggle */}
-            <div className="w-full text-left">
+            <div className="w-full text-left mt-2">
               <button
                 type="button"
                 onClick={() => setShowSettings(!showSettings)}
@@ -123,21 +148,60 @@ function App() {
               </button>
 
               {showSettings && (
-                <div className="mt-4 p-6 bg-white rounded-xl border border-slate-200 shadow-sm animate-fade-in">
-                  <label htmlFor="custom-ignore" className="block text-sm font-medium text-slate-700 mb-2">
-                    Custom Ignore List (Brand names, jargon, etc.)
-                  </label>
-                  <p className="text-xs text-slate-500 mb-2">
-                    Enter words separated by commas or newlines. These will be strictly excluded from keywords and topics.
-                  </p>
-                  <textarea
-                    id="custom-ignore"
-                    value={customIgnore}
-                    onChange={(e) => setCustomIgnore(e.target.value)}
-                    rows={3}
-                    className="block w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
-                    placeholder="e.g. Al Futtaim, Group, LLC, Internal, Login"
-                  />
+                <div className="mt-4 p-6 bg-white rounded-xl border border-slate-200 shadow-sm animate-fade-in grid grid-cols-1 md:grid-cols-2 gap-6">
+                  
+                  {/* Custom Ignore List */}
+                  <div>
+                    <label htmlFor="custom-ignore" className="block text-sm font-medium text-slate-700 mb-2">
+                      Custom Ignore List (Brand names, jargon)
+                    </label>
+                    <textarea
+                      id="custom-ignore"
+                      value={customIgnore}
+                      onChange={(e) => setCustomIgnore(e.target.value)}
+                      rows={4}
+                      className="block w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
+                      placeholder="e.g. Al Futtaim, Group, LLC"
+                    />
+                    <p className="text-xs text-slate-500 mt-2">
+                      Comma or newline separated.
+                    </p>
+                  </div>
+
+                  {/* Diversity Settings */}
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-3 flex items-center gap-2">
+                      <Layers size={16} className="text-indigo-600"/> 
+                      Topic Diversity
+                    </label>
+                    <div className="bg-slate-50 rounded-lg p-1 flex border border-slate-200">
+                      {(['low', 'medium', 'high'] as const).map((level) => (
+                        <button
+                          key={level}
+                          type="button"
+                          onClick={() => setDiversityLevel(level)}
+                          className={`flex-1 py-2 text-sm font-medium rounded-md transition-all capitalize ${
+                            diversityLevel === level
+                              ? 'bg-white text-indigo-600 shadow-sm border border-slate-100'
+                              : 'text-slate-500 hover:text-slate-700'
+                          }`}
+                        >
+                          {level}
+                        </button>
+                      ))}
+                    </div>
+                    <div className="mt-4 bg-blue-50 border border-blue-100 rounded-lg p-4 text-xs text-blue-800">
+                      {diversityLevel === 'low' && (
+                        <p><strong>Low Diversity:</strong> Prioritizes core business themes. Topics will be highly relevant and focused on primary offerings.</p>
+                      )}
+                      {diversityLevel === 'medium' && (
+                        <p><strong>Medium Diversity:</strong> Balances core focus with related industry trends and adjacent topics.</p>
+                      )}
+                      {diversityLevel === 'high' && (
+                        <p><strong>High Diversity:</strong> Maximize breadth. Explores distinct angles and wider market opportunities to avoid repetition.</p>
+                      )}
+                    </div>
+                  </div>
                 </div>
               )}
             </div>
@@ -151,12 +215,12 @@ function App() {
                   {status === AnalysisStatus.ANALYZING ? (
                   <>
                       <Loader2 className="animate-spin h-5 w-5" />
-                      <span>Processing Corpus...</span>
+                      <span>Analyzing SERP...</span>
                   </>
                   ) : (
                   <>
-                      <Cpu className="h-5 w-5" />
-                      <span>Run Statistical Analysis</span>
+                      <Zap className="h-5 w-5 fill-current" />
+                      <span>Generate Strategy</span>
                   </>
                   )}
               </button>
@@ -165,17 +229,17 @@ function App() {
 
           {/* Technology Badges */}
           <div className="mt-8 flex justify-center gap-3 flex-wrap">
-            <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-700 border border-slate-200">
-              No AI / No LLM
+            <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-amber-50 text-amber-700 border border-amber-100">
+              <Sparkles size={12} className="mr-1"/> AI Powered
             </span>
             <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-100">
-              Python-style NLTK
+              <Globe size={12} className="mr-1"/> Search Grounding
             </span>
             <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-indigo-50 text-indigo-700 border border-indigo-100">
-              TF-IDF Algorithms
+              Semantic Analysis
             </span>
             <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-100">
-              Real-time Scraping
+              Real-time Competitor Data
             </span>
           </div>
         </div>
@@ -190,8 +254,8 @@ function App() {
                 </div>
               </div>
               <div className="space-y-2 text-center">
-                 <p className="text-slate-800 font-medium animate-pulse">Running Statistical Engine...</p>
-                 <p className="text-slate-500 text-sm">Fetching HTML • Tokenizing Corpus • Calculating TF-IDF Matrix</p>
+                 <p className="text-slate-800 font-medium animate-pulse">Analyzing Search Landscape...</p>
+                 <p className="text-slate-500 text-sm">Identifying Competitors • Grounding Facts • Generating Strategy</p>
               </div>
             </div>
           </div>
