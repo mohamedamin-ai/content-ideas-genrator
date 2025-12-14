@@ -1,0 +1,5 @@
+{
+  "name": "ContentStrategist Pro",
+  "description": "A content planning tool that replaces AI generation with deterministic statistical analysis. It features real-time web scraping, NLTK-style tokenization, and TF-IDF scoring to identify content opportunities based on pure data.",
+  "requestFramePermissions": []
+}
